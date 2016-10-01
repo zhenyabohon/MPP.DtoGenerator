@@ -14,13 +14,9 @@ namespace DtoGeneration
     {
         static void Main(string[] args)
         {
-            IDtoParseService parser = new DtoParseService();
-            DtoClassCreator creator = new DtoClassCreator();
-            foreach (var method in parser.GetDtoClassModels(@"C:\Logs\json.txt")) { 
-                creator.GenerateDtoClass(method, @"C:\Logs\");
-            }
+            IDtoGenerationService generator = new DtoGenerationService();
+            generator.GenerateDtoFiles(@"C:\Logs\json.txt", @"C:\Logs\");
 
-            
         }
     }
 }

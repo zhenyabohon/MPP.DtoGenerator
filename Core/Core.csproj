@@ -35,6 +35,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -46,11 +47,13 @@
   <ItemGroup>
     <Compile Include="DtoClassCreator.cs" />
     <Compile Include="Enums\TypeEnum.cs" />
+    <Compile Include="Interfaces\IDtoGenerationService.cs" />
     <Compile Include="Interfaces\IDtoParseService.cs" />
     <Compile Include="Models\DtoClassModel.cs" />
     <Compile Include="Enums\FormatEnum.cs" />
     <Compile Include="Models\PropertyModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\DtoGenerationService.cs" />
     <Compile Include="Services\DtoParseService.cs" />
   </ItemGroup>
   <ItemGroup>
