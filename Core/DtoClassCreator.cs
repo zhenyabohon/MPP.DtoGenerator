@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.CodeDom.Compiler;
-using Core.Services;
+using System.Configuration;
 
 namespace Core
 {
@@ -19,26 +19,26 @@ namespace Core
         public DtoClassCreator()
         {
             mappings = GenerateMappings();
-            DtoParseService parser = new DtoParseService();
         }
 
         public void GenerateDtoClass(DtoClassModel dtoModel, string outputPath)
         {
+
             CSharpCodeProvider codeProvider = new CSharpCodeProvider();
-
-            TextWriter writer = new StringWriter();
-
+            CodeCompileUnit unit = new CodeCompileUnit();
+            var nameSpace = new CodeNamespace(ConfigurationManager.AppSettings["Namespace"]);
+            
             CodeTypeDeclaration constructor = new CodeTypeDeclaration();
             constructor.Name = dtoModel.Name;
             constructor.TypeAttributes = System.Reflection.TypeAttributes.Sealed | System.Reflection.TypeAttributes.Public;
             constructor.IsClass = true;
-            
+
             List<CodeMemberProperty> members = new List<CodeMemberProperty>();
             foreach (var property in dtoModel.Properties)
             {
                 CodeMemberProperty member = new CodeMemberProperty();
                 member.Name = property.Name;
-                
+
                 member.Attributes = MemberAttributes.Public | MemberAttributes.Final;
                 member.HasGet = true;
                 member.HasSet = true;
@@ -46,13 +46,18 @@ namespace Core
                 members.Add(member);
             }
 
-            constructor.Members.AddRange(members.ToArray());
-
-            codeProvider.GenerateCodeFromType(constructor, writer, new CodeGeneratorOptions());
-
-            File.AppendAllText($"{outputPath}{dtoModel.Name}.cs", writer.ToString());
-
-            writer.Dispose();
+            using (StringWriter writer = new StringWriter())
+            {
+                constructor.Members.AddRange(members.ToArray());
+                nameSpace.Types.Add(constructor);
+                unit.Namespaces.Add(nameSpace);
+                CodeGeneratorOptions options = new CodeGeneratorOptions();
+                codeProvider.GenerateCodeFromCompileUnit(unit, writer, options);
+                StringBuilder sb = writer.GetStringBuilder();
+                sb.Remove(0, sb.ToString().IndexOf("namespace"));
+                File.WriteAllText($"{outputPath}{dtoModel.Name}.cs", sb.ToString());
+            }
+            
         }
 
         private List<Tuple<FormatEnum, TypeEnum, Type>> GenerateMappings()

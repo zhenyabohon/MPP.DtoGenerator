@@ -36,6 +36,7 @@ namespace Core.Services
                 var properties = new List<PropertyModel>();
                 foreach (var property in item["properties"])
                 {
+                    property["format"] = property["format"] ?? "";
                     properties.Add(new PropertyModel()
                     {
                         Name = property["name"].ToString(),
