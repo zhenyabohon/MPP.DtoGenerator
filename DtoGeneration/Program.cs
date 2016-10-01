@@ -1,5 +1,7 @@
 ﻿using Core;
+using Core.Interfaces;
 using Core.Models;
+using Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,20 +14,13 @@ namespace DtoGeneration
     {
         static void Main(string[] args)
         {
+            IDtoParseService parser = new DtoParseService();
             DtoClassCreator creator = new DtoClassCreator();
-            creator.GenerateDtoClass(new Core.Models.DtoClassModel()
-            {
-                Name = "Khovansky",
-                Properties = new List<PropertyModel>()
-                {
-                    new PropertyModel()
-                    {
-                        Name = "LiverDamage",
-                        Format = FormatEnum.Int32,
-                        Type = TypeEnum.Integer
-                    }
-                }
-            }, @"C:\Logs\");
+            foreach (var method in parser.GetDtoClassModels(@"C:\Logs\json.txt")) { 
+                creator.GenerateDtoClass(method, @"C:\Logs\");
+            }
+
+            
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.CodeDom.Compiler;
+using Core.Services;
 
 namespace Core
 {
@@ -18,6 +19,7 @@ namespace Core
         public DtoClassCreator()
         {
             mappings = GenerateMappings();
+            DtoParseService parser = new DtoParseService();
         }
 
         public void GenerateDtoClass(DtoClassModel dtoModel, string outputPath)
