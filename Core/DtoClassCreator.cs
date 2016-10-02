@@ -55,7 +55,7 @@ namespace Core
                 codeProvider.GenerateCodeFromCompileUnit(unit, writer, options);
                 StringBuilder sb = writer.GetStringBuilder();
                 sb.Remove(0, sb.ToString().IndexOf("namespace"));
-                File.WriteAllText($"{outputPath}{dtoModel.Name}.cs", sb.ToString());
+                File.WriteAllText($"{outputPath}\\{dtoModel.Name}.cs", sb.ToString());
             }
             
         }

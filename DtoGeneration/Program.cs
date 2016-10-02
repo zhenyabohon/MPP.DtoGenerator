@@ -15,7 +15,13 @@ namespace DtoGeneration
         static void Main(string[] args)
         {
             IDtoGenerationService generator = new DtoGenerationService();
-            generator.GenerateDtoFiles(@"C:\Logs\json.txt", @"C:\Logs\");
+            string jsonPath;
+            string folder;
+            Console.Write("Json path: ");
+            jsonPath = Console.ReadLine();
+            Console.Write("Output folder path: ");
+            folder = Console.ReadLine();
+            generator.GenerateDtoFiles(jsonPath, folder);
 
         }
     }

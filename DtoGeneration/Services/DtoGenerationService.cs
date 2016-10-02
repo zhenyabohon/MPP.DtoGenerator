@@ -16,8 +16,6 @@ namespace Core.Services
 
         private DtoClassCreator creator;
 
-        private static ManualResetEvent resetEvent = new ManualResetEvent(false);
-
         public DtoGenerationService()
         {
             jsonParseSerice = new DtoParseService();
@@ -28,17 +26,26 @@ namespace Core.Services
         {
 
             List<DtoClassModel> models = jsonParseSerice.GetDtoClassModels(jsonPath);
-
-            ThreadPool.SetMaxThreads(int.Parse(ConfigurationManager.AppSettings["MaxThreads"]), int.Parse(ConfigurationManager.AppSettings["MaxThreads"]));
-            foreach(var model in models)
+            var resetEvents = new ManualResetEvent[models.Count];
+            for (int i = 0; i < models.Count; i++)
             {
+                resetEvents[i] = new ManualResetEvent(false);
+            }
+            ThreadPool.SetMaxThreads(int.Parse(ConfigurationManager.AppSettings["MaxThreads"]), int.Parse(ConfigurationManager.AppSettings["MaxThreads"]));
+            foreach (var model in models)
+            {               
                 ThreadPool.QueueUserWorkItem(x => {
                     creator.GenerateDtoClass(model, outputDirectory);
-                    resetEvent.Set();
+                    resetEvents[models.IndexOf(model)].Set();
                 });
-                
             }
-            resetEvent.WaitOne();
+
+            foreach (var resetEvent in resetEvents)
+            {
+                resetEvent.WaitOne();
+            }
+            Console.WriteLine("Complete");
+            Console.Read();
         }
 
 
