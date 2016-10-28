@@ -3,10 +3,12 @@ using Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DtoGeneration;
 
 namespace Core.Services
 {
@@ -30,19 +32,29 @@ namespace Core.Services
             for (int i = 0; i < models.Count; i++)
             {
                 resetEvents[i] = new ManualResetEvent(false);
+
             }
-            ThreadPool.SetMaxThreads(int.Parse(ConfigurationManager.AppSettings["MaxThreads"]), int.Parse(ConfigurationManager.AppSettings["MaxThreads"]));
+
+
+            var semaphore = new Semaphore(ConfigurationSettingsManager.MaxThreads, ConfigurationSettingsManager.MaxThreads);
+
             foreach (var model in models)
-            {               
-                ThreadPool.QueueUserWorkItem(x => {
-                    creator.GenerateDtoClass(model, outputDirectory);
+            {
+                semaphore.WaitOne();
+                ThreadPool.QueueUserWorkItem(x =>
+                {
+                    var dto = creator.GenerateDtoClass(model, ConfigurationSettingsManager.Namespace);
+                    File.WriteAllText($"{outputDirectory}\\{model.Name}.cs", dto);
                     resetEvents[models.IndexOf(model)].Set();
-                });
+                    semaphore.Release();
+                });        
+
             }
 
             foreach (var resetEvent in resetEvents)
             {
                 resetEvent.WaitOne();
+                resetEvent.Dispose();
             }
             Console.WriteLine("Complete");
             Console.Read();

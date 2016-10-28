@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.CodeDom.Compiler;
 using System.Configuration;
+using System.Threading;
 
 namespace Core
 {
@@ -16,17 +17,12 @@ namespace Core
     {
         private List<Tuple<FormatEnum, TypeEnum, Type>> mappings;
 
-        public DtoClassCreator()
-        {
-            mappings = GenerateMappings();
-        }
-
-        public void GenerateDtoClass(DtoClassModel dtoModel, string outputPath)
+        public string GenerateDtoClass(DtoClassModel dtoModel, string nameSpace)
         {
 
             CSharpCodeProvider codeProvider = new CSharpCodeProvider();
             CodeCompileUnit unit = new CodeCompileUnit();
-            var nameSpace = new CodeNamespace(ConfigurationManager.AppSettings["Namespace"]);
+            var codeNameSpace = new CodeNamespace(nameSpace);
             
             CodeTypeDeclaration constructor = new CodeTypeDeclaration();
             constructor.Name = dtoModel.Name;
@@ -49,13 +45,13 @@ namespace Core
             using (StringWriter writer = new StringWriter())
             {
                 constructor.Members.AddRange(members.ToArray());
-                nameSpace.Types.Add(constructor);
-                unit.Namespaces.Add(nameSpace);
+                codeNameSpace.Types.Add(constructor);
+                unit.Namespaces.Add(codeNameSpace);
                 CodeGeneratorOptions options = new CodeGeneratorOptions();
                 codeProvider.GenerateCodeFromCompileUnit(unit, writer, options);
                 StringBuilder sb = writer.GetStringBuilder();
                 sb.Remove(0, sb.ToString().IndexOf("namespace"));
-                File.WriteAllText($"{outputPath}\\{dtoModel.Name}.cs", sb.ToString());
+                return sb.ToString();
             }
             
         }
